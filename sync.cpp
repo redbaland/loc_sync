@@ -65,13 +65,14 @@ void readPaths(const string cfg, vector<fs::path>& paths) {
 		throw std::invalid_argument("Can't read: " + cfg);
 	for (string i; getline(file, i); paths.push_back(i));
 	file.close();
-	if (fs::status(paths[0]).type() != fs::file_type::directory)
-		throw std::invalid_argument("Isn't a directory \nWrong path: " + paths[0].string());
 	for (int i = 0; i < paths.size(); ++i) {
+		paths[i] = fs::weakly_canonical(paths[i]);
 		cout << paths[i] << endl;
-		if (i != 0 && paths[i] == paths[0])
+		if (i == 0 && fs::status(paths[i]).type() != fs::file_type::directory)
+			throw std::invalid_argument("Isn't a directory \nWrong path: " + paths[0].string());
+		else if (i > 0 && paths[i] == paths[0])
 			throw std::invalid_argument("Main path isn't unique \n");
-		}
+	}
 
 }
 
